@@ -42,11 +42,23 @@ print('Numpy: ', np.__version__)
 # Konfiguracja modelu:
 conf = dict()
 
-# Opcja pozwalająca zapisać wagi modelu
-conf['save_model'] = 1
+# Rozdzielczość skanów
+conf['image_shape'] = (160, 160)
+print('image_shape = ', conf['image_shape'])
 
-# Granica podziału danych na zbiór testowy i walidacyjny
-conf['train_valid_fraction'] = 0.7
+# Parametry warstw
+conf['level_1_filters'] = 4
+print('level_1_filters = ', conf['level_1_filters'])
+conf['level_2_filters'] = 8
+print('level_2_filters = ', conf['level_2_filters'])
+conf['dense_layer_size'] = 128
+print('dense_layer_size = ', conf['dense_layer_size'])
+conf['dropout_value'] = 0.5
+print('dropout_value = ', conf['dropout_value'])
+
+# Wskaźnik uczenia
+conf['learning_rate'] = 1e-3
+print('learning_rate = ', conf['learning_rate'])
 
 # Rozmiar wsadu
 conf['batch_size'] = 128
@@ -56,14 +68,6 @@ print('batch_size = ', conf['batch_size'])
 conf['nb_epochs'] = 20
 print('nb_epochs = ', conf['nb_epochs'])
 
-# Rozdzielczość skanów
-conf['image_shape'] = (160, 160)
-print('image_shape = ', conf['image_shape'])
-
-# Wskaźnik uczenia
-conf['learning_rate'] = 1e-3
-print('learning_rate = ', conf['learning_rate'])
-
 # Liczba próbek treningowych na epokę, można ją ustawić opcjonalnie
 conf['samples_train_per_epoch'] = 0
 print('samples_train_per_epoch = ', conf['samples_train_per_epoch'])
@@ -72,11 +76,11 @@ print('samples_train_per_epoch = ', conf['samples_train_per_epoch'])
 conf['samples_valid_per_epoch'] = 0
 print('samples_valid_per_epoch = ', conf['samples_valid_per_epoch'])
 
-# Parametry warstw
-conf['level_1_filters'] = 4
-conf['level_2_filters'] = 8
-conf['dense_layer_size'] = 128
-conf['dropout_value'] = 0.5
+# Granica podziału danych na zbiór testowy i walidacyjny
+conf['train_valid_fraction'] = 0.7
+
+# Opcja pozwalająca zapisać wagi modelu
+conf['save_model'] = 1
 
 # Katalog danych
 data_dir = 'Dane'
@@ -208,7 +212,7 @@ def augment(image, rescale_factor_range=(0.8, 1), rotation_angle_range=(-20, 20)
     return img
 
 
-# Utworzenie generatora danych treningowych
+# Funkcja generująca dane treningowe
 def batch_generator_train(files, train_csv_table, batch_size, do_aug=True):
     number_of_batches = np.ceil(len(files)/batch_size)
     counter = 0
@@ -218,7 +222,7 @@ def batch_generator_train(files, train_csv_table, batch_size, do_aug=True):
         image_list = []
         mask_list = []
         for f in batch_files:
-            image = load_and_normalise_dicom(f, conf["image_shape"][0], conf["image_shape"][0])
+            image = load_and_normalise_dicom(f, conf["image_shape"][0], conf["image_shape"][1])
             if do_aug:
                 image = augment(image, rescale_factor_range=(0.8, 1), rotation_angle_range=(-20, 20), shift=25,
                                 color_inverse=True, flip=True)
@@ -244,7 +248,7 @@ def batch_generator_train(files, train_csv_table, batch_size, do_aug=True):
 def CNN():
     model = Sequential()
     model.add(layers.Conv2D(filters=conf['level_1_filters'], kernel_size=(3, 3), activation='relu',
-                            input_shape=(conf["image_shape"][0], conf["image_shape"][0], 1)))
+                            input_shape=(conf["image_shape"][0], conf["image_shape"][1], 1)))
     model.add(layers.MaxPooling2D(pool_size=(2, 2)))
     model.add(layers.Conv2D(filters=conf['level_2_filters'], kernel_size=(3, 3), activation='relu'))
     model.add(layers.MaxPooling2D(pool_size=(2, 2)))
@@ -300,11 +304,11 @@ def create_model_and_plots():
     start = time.time()
     history = model.fit_generator(generator=batch_generator_train(train_files, train_csv_table,
                                                                   conf['batch_size'], do_aug=True),
-                                  steps_per_epoch=steps_per_epoch,
-                                  epochs=conf['nb_epochs'],
                                   validation_data=batch_generator_train(valid_files, train_csv_table,
                                                                         conf['batch_size'], do_aug=False),
+                                  steps_per_epoch=steps_per_epoch,
                                   validation_steps=validation_steps,
+                                  epochs=conf['nb_epochs'],
                                   verbose=1)
     end = time.time()
     print(end - start)
@@ -363,6 +367,7 @@ def create_submission_model(model):
         image_list = np.expand_dims(image_list, axis=3)
         batch_size = len(image_list)
         prediction = model.predict(image_list, verbose=1, batch_size=batch_size)
+        print(prediction[:, 0])
         pred_value = prediction[:, 0].mean()
         sample_subm.loc[sample_subm['id'] == id, 'cancer'] = pred_value
     sample_subm.to_csv('subm.csv', index=False)
