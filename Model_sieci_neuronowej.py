@@ -1,11 +1,11 @@
 """"
 Po pobraniu dane zostały rozpakowane do folderu "Dane". Nazwa folderu z danymi treningowymi "stag1" została zmieniona na
-"input". Następnie wszystkie podfoldery w tym folderze, opisane jako ID pacjentów, umieszczono w folderze "sample_data".
-Dodatkowo do folderu "input" został przeniesiony plik z etykietami "stage1_labels.csv". Folder z danymi testowymi
-"stage2" nie został wykorzystany, ponieważ nie była do niego dołączona lista etykiet pacjentów. Zamiast tego przykłady
-sprawdzające działanie modelu wydzielono z folderu "sample_data".
+"input". Następnie wszystkie podfoldery w tym folderze, opisane jako ID pacjentów, umieszczono w folderze
+"sample_images". Dodatkowo do folderu "input" został przeniesiony plik z etykietami "stage1_labels.csv". Folder z danymi
+testowymi "stage2" nie został wykorzystany, ponieważ nie była do niego dołączona lista etykiet pacjentów. Zamiast tego
+przykłady sprawdzające działanie modelu wydzielono z folderu "sample_images".
 Ostatecznie w folderze z danymi "Dane" znajdował się folder z danymi treningowymi "input", który zawierał plik z etykie-
-tami "stage1_labels.csv" oraz podfolder "sample_data" ze skanami pacjentów.
+tami "stage1_labels.csv" oraz podfolder "sample_images" ze skanami pacjentów.
 
 Dane zostały pobrane ze strony: https://academictorrents.com/details/015f31a94c600256868be155358dc114157507fc
 Program bazuje na kodzie ze strony: https://www.kaggle.com/zfturbo/keras-vs-cancer
