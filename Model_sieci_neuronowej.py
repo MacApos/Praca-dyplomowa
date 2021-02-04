@@ -164,14 +164,14 @@ def augment(image, rescale_factor_range=(0.8, 1), rotation_angle_range=(-20, 20)
         rescale_factor = np.random.random_sample() * (rescale_factor_range[1] - rescale_factor_range[0]) + \
                          rescale_factor_range[0]
         new_height = round(height * rescale_factor)
-        new_width = round(height * rescale_factor)
+        new_width = round(width * rescale_factor)
         if rescale_factor < 1.0:
             img = np.zeros_like(image)
             row = (height - new_height) // 2
             col = (width - new_width) // 2
             img[row:row + new_height, col:col + new_width] = ndimage.zoom(image, (float(rescale_factor),
                                                                                   float(rescale_factor)),
-                                                                          mode='nearest')[0:new_height, 0:new_width]
+                                                                          ode='nearest')[0:new_height, 0:new_width]
         elif rescale_factor > 1.0:
             row = (new_height - height) // 2
             col = (new_width - width) // 2
@@ -189,9 +189,9 @@ def augment(image, rescale_factor_range=(0.8, 1), rotation_angle_range=(-20, 20)
     if rotation_angle_range:
         if rotation_angle_range[0] >= rotation_angle_range[1]:
             raise TypeError('invalid rotation angle factor shape')
-        angel = np.random.random_sample() * (rotation_angle_range[1] - rotation_angle_range[0]) + rotation_angle_range[
+        angle = np.random.random_sample() * (rotation_angle_range[1] - rotation_angle_range[0]) + rotation_angle_range[
             0]
-        img = ndimage.rotate(img, angel, reshape=False)
+        img = ndimage.rotate(img, angle, reshape=False)
 
     if shift:
         offset = np.array([[np.random.randint(-shift, shift)], [np.random.randint(-shift, shift)]])
